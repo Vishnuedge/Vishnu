@@ -1,0 +1,272 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'auth.dart';
+
+
+class LoginPage extends StatefulWidget{
+  LoginPage({this.auth, this.onSignedIn});
+  final BaseAuth auth;
+  final VoidCallback onSignedIn;
+  @override
+  State<StatefulWidget> createState()=>new Loginpagestate();
+}
+enum FormType{
+  login,
+  register
+}
+
+class Loginpagestate extends State<LoginPage>{
+  final formkey = new GlobalKey<FormState>();
+
+  String _email;
+  String _password;
+  FormType _formType = FormType.login;
+
+
+  bool validateAndSave(){
+    final form = formkey.currentState;
+    if (form.validate()){
+      form.save();
+      return true;
+    }
+    return false;
+  }
+  void validateAndsubmit() async{
+    if(validateAndSave()){
+      try {
+        if (_formType == FormType.login) {
+          String userId = await widget.auth.signInWithEmailAndPassword( _email, _password);
+          print('Signed in :$userId');
+        }else{
+          String userId= await widget.auth.createUserWithEmailAndPassword( _email, _password);
+          print('Registered user: $userId');
+        }
+        widget.onSignedIn();
+      }
+      catch(e) {
+        print('ERROR : $e');
+      }
+    }
+  }
+  void moveToRegister() {
+    formkey.currentState.reset();
+    setState(() {
+      _formType = FormType.register;
+    });
+  }
+  void moveToLogin(){
+    formkey.currentState.reset();
+    setState(() {
+
+      _formType= FormType.login;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xffe8d47d),
+                  Color(0xffe8d47d),
+                  Color(0xffffffff)
+                ]
+              )
+            ),
+            child: Form (
+              key: formkey,
+
+              child: Column (
+                  crossAxisAlignment: CrossAxisAlignment.center ,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: buildText()+  buildInputs() + buildSubmitButtons() + buildTxt(),
+                ),
+
+            ),
+        )
+    );
+  }
+
+  List <Widget> buildText(){
+    return[
+       Container(
+          child: Stack(
+
+            children: <Widget>[
+
+                 Container(
+                  padding: EdgeInsets.only(bottom:120 ),
+                  child: new Image(image: new AssetImage("assets/ce.png")),
+                    ),
+
+              Positioned(
+                left: 70,
+                bottom: 40,
+                child: Container(
+                  padding: EdgeInsets.all(40),
+                  child: Text('Creative',
+                      style: TextStyle(
+                          fontSize: 30.0, fontWeight: FontWeight.bold)),
+                ),
+
+              ),
+                Positioned(
+                        left: 190,
+                   bottom: 40,
+                   child: Container(
+                          padding: EdgeInsets.all(40),
+                      child:
+                      Text('Edge', style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold,
+                          color:Colors.grey )
+                      ),
+                ),
+                ),
+              Positioned(
+                left: 50,
+                bottom: 10,
+                child: Container(
+                  padding: EdgeInsets.all(40),
+                  child:
+                  Text('--- Designed For Creative Edge ---', style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold,)
+                  ),
+                ),
+              ),
+            ],
+            ),
+        ),
+
+    ];
+
+  }
+
+  List<Widget> buildInputs(){
+
+    return[
+      Container(
+              child: TextFormField(
+                  decoration: InputDecoration(
+
+                      icon: Icon(Icons.mail_outline,color: Colors.black,),
+                      hintText: "Enter Email Address",hintStyle: TextStyle(color: Colors.black54),
+                      contentPadding: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 35.0),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        borderSide: BorderSide(color :Colors.transparent )
+                      ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                      borderSide: BorderSide(color: Colors.black,width: 3.0)
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[300]
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  onSaved: (value)=> _email = value,
+                  validator: (value) => value.isEmpty ?'Email can\'t be empty': null
+              ),
+              margin: EdgeInsets.only(left: 20,right: 20),
+
+            ),
+            SizedBox(
+               height: 20,
+                ),
+
+              Container(
+              child: TextFormField(
+                  decoration: new InputDecoration(
+                       icon: Icon(Icons.lock_outline,color: Colors.black,),
+                      hintText: "Enter Password",hintStyle: TextStyle(color: Colors.black54),
+                      contentPadding: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 35.0),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                          borderSide: BorderSide(color :Colors.transparent)
+                      ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                        borderSide: BorderSide(color: Colors.black,width: 3.0)
+                    ),
+                      filled: true,
+                      fillColor: Colors.grey[300]
+                  ),
+
+                  keyboardType: TextInputType.text,
+                  obscureText: true,
+                  onSaved: (value)=> _password = value,
+                  validator: (value) => value.isEmpty ?'Password can\'t be empty': null
+              ),
+              margin: EdgeInsets.only(left: 20,right: 20,bottom: 40),
+            ),
+      SizedBox(
+        height: 10,
+        ),
+        ];
+      }
+  List <Widget>buildTxt(){
+    return[
+    Container(
+      child: Stack(
+          children: <Widget>[
+      Container(
+      padding: EdgeInsets.only(bottom:120 ),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(0, 0, 0.0, 10.0),
+        child:
+        Text('Dont Have a Account ?', style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold,)
+        ),
+      ),
+      ),
+          ]
+      )
+    )
+    ];
+  }
+  List<Widget> buildSubmitButtons(){
+    if (_formType == FormType.login) {
+      return [
+        new MaterialButton(
+          height: 50,
+          color: Colors.white,
+          textColor: Colors.black,
+          minWidth: 350.0,
+          shape:RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0)
+          ),
+
+          child: new Text("LOGIN", style: TextStyle(fontSize: 16.0),),
+          onPressed: validateAndsubmit,
+        ),
+        new FlatButton(
+          padding: EdgeInsets.fromLTRB(250.0,0.0,10.0,0.0),
+          child: new Text(
+            ' SignUp Now', style: new TextStyle(fontSize: 15.0),),
+          onPressed: moveToRegister,
+        ),
+        new FlatButton(
+          padding: EdgeInsets.fromLTRB(50.0,00.0,50.0,00.0),
+          child: new Text('Forget Password ?',style: new TextStyle(fontSize: 15.0),),
+          onPressed: moveToRegister,
+        ),
+      ];
+    }else{
+      return[
+        new MaterialButton(
+          color: Colors.teal,
+          textColor: Colors.white,
+          child: new Text("Create An Account"),
+          onPressed: validateAndsubmit,
+        ),
+        new FlatButton(
+          child: new Text('Have an account? Login', style: new TextStyle(fontSize: 20.0),
+          ),
+          onPressed: moveToLogin,
+        )
+      ];
+    }
+  }
+}
+
+
